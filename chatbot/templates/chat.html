@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>ChatBot de Livros 📚</title>
+    <style>
+        body { font-family: Arial; max-width: 600px; margin: auto; padding-top: 40px; }
+        .msg { margin: 10px 0; }
+        .user { color: blue; }
+        .bot { color: green; }
+    </style>
+</head>
+<body>
+    <h2>ChatBot de Recomendação de Livros</h2>
+
+    <div>
+        {% for pergunta, resposta in conversas %}
+            <div class="msg user"><strong>Você:</strong> {{ pergunta }}</div>
+            <div class="msg bot"><strong>Bot:</strong> {{ resposta }}</div>
+        {% endfor %}
+    </div>
+
+    <form method="post">
+        <input type="text" name="pergunta" required style="width: 80%;">
+        <button type="submit">Enviar</button>
+    </form>
+    <form method="post" action="/limpar" style="margin-top: 10px;">
+    <button type="submit" style="background-color: #dc3545; color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer;">
+        Limpar Conversa
+    </button>
+    </form>
+</body>
+</html>
