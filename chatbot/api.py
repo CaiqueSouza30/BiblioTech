@@ -33,28 +33,28 @@ def traduzir_para_portugues(texto):
     except Exception as e:
         print("Erro na tradução:", e)
         return texto
-
-# --- Justificativa crítica sem fallback genérico ---
 def gerar_justificativa_critica(titulo, autores, ano, descricao, pergunta_usuario):
     """
-    Gera recomendação detalhada, cativante e personalizada, sem jamais usar frases genéricas.
+    Gera recomendação detalhada e personalizada, evitando respostas genéricas.
     """
     try:
         contexto = f"Livro: '{titulo}' de {autores}, publicado em {ano}."
         if descricao:
             contexto += f" Sinopse: {descricao}."
+        else:
+            contexto += " (Sem sinopse disponível.)"
         contexto += f" Pergunta do usuário: {pergunta_usuario}."
 
         prompt = (
-            "Você é um crítico literário brasileiro renomado. Com base no contexto abaixo, "
-            "escreva uma recomendação detalhada e envolvente.\n"
+            "Você é um assistente literário brasileiro. Com base no contexto abaixo, "
+            "escreva uma recomendação detalhada, cativante e personalizada.\n"
             "Regras:\n"
-            "- Use 4 a 6 frases.\n"
-            "- Destaque narrativa, estilo do autor, temas explorados e relevância.\n"
-            "- A recomendação deve ser cativante, persuasiva e personalizada.\n"
+            "- Use de 4 a 6 frases.\n"
+            "- Destaque a narrativa, o estilo do autor, os temas centrais e a relevância.\n"
+            "- A recomendação deve ser envolvente, persuasiva e única.\n"
             "- NÃO use frases genéricas como 'é relevante para o tema' ou 'oferece uma leitura envolvente'.\n"
-            "- Se não houver informações suficientes, apenas diga 'Não foi possível gerar uma recomendação detalhada neste momento'.\n\n"
-            f"Contexto: {contexto}"
+            "Se não houver descrição, baseie-se apenas no título e autor.\n"
+            f"\nContexto: {contexto}"
         )
 
         resposta = openai.ChatCompletion.create(
@@ -65,13 +65,23 @@ def gerar_justificativa_critica(titulo, autores, ano, descricao, pergunta_usuari
         )
 
         conteudo = resposta.choices[0].message.content.strip()
-        if not conteudo:
-            return "Não foi possível gerar uma recomendação detalhada neste momento."
+
+        if not conteudo or "não foi possível" in conteudo.lower():
+            # Se resposta for vazia ou parecer uma falha, criar fallback com descrição
+            print("⚠️ Conteúdo vazio ou genérico detectado na resposta da IA.")
+            if descricao:
+                return f"📘 Este livro, '{titulo}' de {autores}, traz uma narrativa que pode ser interessante para quem se interessa pelo tema abordado. {descricao}"
+            else:
+                return f"📘 O livro '{titulo}' de {autores}, publicado em {ano}, pode ser uma leitura interessante, mesmo sem uma sinopse disponível."
+
         return conteudo
 
     except Exception as e:
         print("Erro ao gerar justificativa crítica:", e)
-        return "Não foi possível gerar uma recomendação detalhada neste momento."
+        if descricao:
+            return f"📘 '{titulo}' de {autores}. Descrição: {descricao}"
+        else:
+            return f"📘 '{titulo}' de {autores}, publicado em {ano}. Sem descrição disponível."
 
 # --- Auxiliares ---
 def obter_descricao(work_key):
@@ -89,47 +99,71 @@ def obter_descricao(work_key):
     except requests.exceptions.RequestException:
         return None
 
-# --- Busca na OpenLibrary ---
+# --- Busca na Google Books API ---
 def buscar_livro_por_subject(subject, pergunta_usuario):
-    url = f"https://openlibrary.org/subjects/{subject.replace(' ','_')}.json?limit=1"
+    # Buscar por assunto (tema) no Google Books usando q=subject
+    url = "https://www.googleapis.com/books/v1/volumes"
+    params = {
+        "q": f"subject:{subject}",
+        "maxResults": 1,
+        "langRestrict": "pt"
+    }
     try:
-        response = requests.get(url, timeout=10)
+        response = requests.get(url, params=params, timeout=10)
         response.raise_for_status()
         dados = response.json()
     except requests.exceptions.RequestException:
         return None
 
-    works = dados.get("works", [])
-    if not works:
+    items = dados.get("items", [])
+    if not items:
         return None
 
-    livro = works[0]
-    titulo = traduzir_para_portugues(livro.get("title", "Desconhecido"))
-    autores = ", ".join([traduzir_para_portugues(a.get("name", "Desconhecido")) for a in livro.get("authors", [])])
-    ano = livro.get("first_publish_year", "Desconhecido")
-    descricao = obter_descricao(livro.get("key")) if livro.get("key") else None
+    livro = items[0]["volumeInfo"]
+    titulo = livro.get("title", "Desconhecido")
+    autores = ", ".join(livro.get("authors", ["Desconhecido"]))
+    ano = livro.get("publishedDate", "Desconhecido")
+    descricao = livro.get("description", None)
+    if descricao:
+        descricao = traduzir_para_portugues(descricao)
 
     justificativa = gerar_justificativa_critica(titulo, autores, ano, descricao, pergunta_usuario)
     return f"📚 {titulo} de {autores}, publicado em {ano}. {justificativa}"
 
 def buscar_livro_ou_autor(query, tipo, pergunta_usuario):
-    url = f"https://openlibrary.org/search.json?{('title' if tipo=='livro' else 'author')}={query}&limit=1"
+    # Para livro: busca por título; para autor: busca por autor no q
+    url = "https://www.googleapis.com/books/v1/volumes"
+    if tipo == "livro":
+        q = f"intitle:{query}"
+    elif tipo == "autor":
+        q = f"inauthor:{query}"
+    else:
+        q = query  # fallback
+
+    params = {
+        "q": q,
+        "maxResults": 1,
+        "langRestrict": "pt"
+    }
+
     try:
-        response = requests.get(url, timeout=10)
+        response = requests.get(url, params=params, timeout=10)
         response.raise_for_status()
         dados = response.json()
     except requests.exceptions.RequestException as e:
-        return f"Erro ao consultar Open Library: {e}"
+        return f"Erro ao consultar Google Books: {e}"
 
-    docs = dados.get("docs", [])
-    if not docs:
+    items = dados.get("items", [])
+    if not items:
         return None
 
-    livro = docs[0]
-    titulo = traduzir_para_portugues(livro.get("title", "Desconhecido"))
-    autores = ", ".join([traduzir_para_portugues(a) for a in livro.get("author_name", ["Desconhecido"])])
-    ano = livro.get("first_publish_year", "Desconhecido")
-    descricao = obter_descricao(livro.get("key")) if livro.get("key") else None
+    livro = items[0]["volumeInfo"]
+    titulo = livro.get("title", "Desconhecido")
+    autores = ", ".join(livro.get("authors", ["Desconhecido"]))
+    ano = livro.get("publishedDate", "Desconhecido")
+    descricao = livro.get("description", None)
+    if descricao:
+        descricao = traduzir_para_portugues(descricao)
 
     justificativa = gerar_justificativa_critica(titulo, autores, ano, descricao, pergunta_usuario)
     return f"📚 {titulo} de {autores}, publicado em {ano}. {justificativa}"
