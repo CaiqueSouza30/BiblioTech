@@ -8,16 +8,89 @@ import json
 app = Flask(__name__)
 
 # Configuração da OpenAI
-openai.api_key = os.environ.get("OPENAI_API_KEY")  # coloque sua chave aqui
+openai.api_key = os.environ.get("OPENAI_API_KEY")
 
-# Histórico das conversas por sessão
+# Histórico das conversas
 conversas_armazenadas = {}
 
-# Palavras irrelevantes para filtrar
+# Palavras irrelevantes
 palavras_irrelevantes = {"a","o","e","isso","aquilo","ok","sim","não","na","de","do","da","é","eh"}
 
-# --- Funções de busca na Open Library ---
-def buscar_livro_por_subject(subject):
+# --- Tradução ---
+def traduzir_para_portugues(texto):
+    if not texto:
+        return None
+    try:
+        resposta = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role":"system","content":"Traduza para português, apenas o texto."},
+                {"role":"user","content":texto}
+            ],
+            max_tokens=300
+        )
+        return resposta.choices[0].message.content.strip()
+    except Exception as e:
+        print("Erro na tradução:", e)
+        return texto
+
+# --- Justificativa crítica sem fallback genérico ---
+def gerar_justificativa_critica(titulo, autores, ano, descricao, pergunta_usuario):
+    """
+    Gera recomendação detalhada, cativante e personalizada, sem jamais usar frases genéricas.
+    """
+    try:
+        contexto = f"Livro: '{titulo}' de {autores}, publicado em {ano}."
+        if descricao:
+            contexto += f" Sinopse: {descricao}."
+        contexto += f" Pergunta do usuário: {pergunta_usuario}."
+
+        prompt = (
+            "Você é um crítico literário brasileiro renomado. Com base no contexto abaixo, "
+            "escreva uma recomendação detalhada e envolvente.\n"
+            "Regras:\n"
+            "- Use 4 a 6 frases.\n"
+            "- Destaque narrativa, estilo do autor, temas explorados e relevância.\n"
+            "- A recomendação deve ser cativante, persuasiva e personalizada.\n"
+            "- NÃO use frases genéricas como 'é relevante para o tema' ou 'oferece uma leitura envolvente'.\n"
+            "- Se não houver informações suficientes, apenas diga 'Não foi possível gerar uma recomendação detalhada neste momento'.\n\n"
+            f"Contexto: {contexto}"
+        )
+
+        resposta = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=500,
+            temperature=0.9
+        )
+
+        conteudo = resposta.choices[0].message.content.strip()
+        if not conteudo:
+            return "Não foi possível gerar uma recomendação detalhada neste momento."
+        return conteudo
+
+    except Exception as e:
+        print("Erro ao gerar justificativa crítica:", e)
+        return "Não foi possível gerar uma recomendação detalhada neste momento."
+
+# --- Auxiliares ---
+def obter_descricao(work_key):
+    try:
+        url = f"https://openlibrary.org{work_key}.json"
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        dados = response.json()
+        descricao = dados.get("description")
+        if isinstance(descricao, dict):
+            descricao = descricao.get("value")
+        if isinstance(descricao, str):
+            return traduzir_para_portugues(descricao)
+        return None
+    except requests.exceptions.RequestException:
+        return None
+
+# --- Busca na OpenLibrary ---
+def buscar_livro_por_subject(subject, pergunta_usuario):
     url = f"https://openlibrary.org/subjects/{subject.replace(' ','_')}.json?limit=1"
     try:
         response = requests.get(url, timeout=10)
@@ -31,13 +104,15 @@ def buscar_livro_por_subject(subject):
         return None
 
     livro = works[0]
-    titulo = livro.get("title","Desconhecido")
-    autores = ", ".join([a.get("name","Desconhecido") for a in livro.get("authors",[])])
-    link = f"https://openlibrary.org{livro.get('key')}" if livro.get("key") else "#"
+    titulo = traduzir_para_portugues(livro.get("title", "Desconhecido"))
+    autores = ", ".join([traduzir_para_portugues(a.get("name", "Desconhecido")) for a in livro.get("authors", [])])
+    ano = livro.get("first_publish_year", "Desconhecido")
+    descricao = obter_descricao(livro.get("key")) if livro.get("key") else None
 
-    return f"📚 Aqui está um livro relacionado a '{subject}': <strong>{titulo}</strong> de {autores}. Saiba mais: <a href='{link}' target='_blank'>Open Library</a>"
+    justificativa = gerar_justificativa_critica(titulo, autores, ano, descricao, pergunta_usuario)
+    return f"📚 {titulo} de {autores}, publicado em {ano}. {justificativa}"
 
-def buscar_livro_ou_autor(query, tipo="livro"):
+def buscar_livro_ou_autor(query, tipo, pergunta_usuario):
     url = f"https://openlibrary.org/search.json?{('title' if tipo=='livro' else 'author')}={query}&limit=1"
     try:
         response = requests.get(url, timeout=10)
@@ -46,27 +121,29 @@ def buscar_livro_ou_autor(query, tipo="livro"):
     except requests.exceptions.RequestException as e:
         return f"Erro ao consultar Open Library: {e}"
 
-    docs = dados.get("docs",[])
+    docs = dados.get("docs", [])
     if not docs:
         return None
 
     livro = docs[0]
-    titulo = livro.get("title","Desconhecido")
-    autores = ", ".join(livro.get("author_name",["Desconhecido"]))
-    ano = livro.get("first_publish_year","Desconhecido")
-    link = f"https://openlibrary.org{livro.get('key')}" if livro.get("key") else "#"
+    titulo = traduzir_para_portugues(livro.get("title", "Desconhecido"))
+    autores = ", ".join([traduzir_para_portugues(a) for a in livro.get("author_name", ["Desconhecido"])])
+    ano = livro.get("first_publish_year", "Desconhecido")
+    descricao = obter_descricao(livro.get("key")) if livro.get("key") else None
 
-    return f"📚 <strong>{titulo}</strong> de {autores}, publicado em {ano}. Saiba mais: <a href='{link}' target='_blank'>Open Library</a>"
+    justificativa = gerar_justificativa_critica(titulo, autores, ano, descricao, pergunta_usuario)
+    return f"📚 {titulo} de {autores}, publicado em {ano}. {justificativa}"
 
 # --- Interpretação com IA ---
 def interpretar_pergunta_ia(pergunta):
     prompt = (
-        "Você é um assistente literário. Receba qualquer pergunta do usuário sobre livros acadêmicos ou literários "
+        "Você é um assistente literário. Responda sempre em português.\n"
+        "Receba qualquer pergunta do usuário sobre livros acadêmicos ou literários "
         "e retorne um JSON com:\n"
         "- tipo: 'livro', 'autor', 'tema', 'saudacao'\n"
         "- valor: título, autor ou tema detectado (ou null)\n"
-        "Retorne apenas o JSON. Tente extrair o tema principal mesmo que a pergunta seja genérica, "
-        "como 'livro sobre mitologia nórdica'.\n\nPergunta do usuário: " + pergunta
+        "Retorne apenas o JSON. Tente extrair o tema principal mesmo que a pergunta seja genérica.\n\n"
+        f"Pergunta do usuário: {pergunta}"
     )
     try:
         resposta = openai.ChatCompletion.create(
@@ -74,11 +151,9 @@ def interpretar_pergunta_ia(pergunta):
             messages=[{"role":"user","content":prompt}],
             max_tokens=150
         )
-        conteudo = resposta.choices[0].message.content.strip()
-        return json.loads(conteudo)
+        return json.loads(resposta.choices[0].message.content.strip())
     except Exception as e:
         print("Erro IA:", e)
-        # fallback: trata toda a pergunta como tema
         return {"tipo":"tema","valor":pergunta}
 
 # --- Validação e saudação ---
@@ -87,7 +162,9 @@ def entrada_valida(pergunta):
     return len(pergunta_clean) > 1 and pergunta_clean not in palavras_irrelevantes
 
 def eh_saudacao(pergunta):
-    saudacoes = ["oi","olá","ola","bom dia","boa tarde","boa noite","hey","hello"]
+    saudacoes = ["oi","olá","ola","bom dia","boa tarde","boa noite","hey","hello","iae",
+                 "eae","fala","tudo bem","como vai","como você está","tudo certo","saudações",
+                 "salve","e aí","beleza","opa","i ae","e ae"]
     pergunta_clean = pergunta.strip().lower()
     return any(palavra in pergunta_clean for palavra in saudacoes)
 
@@ -106,22 +183,18 @@ def gerar_resposta(pergunta):
     if tipo=="saudacao":
         return "Olá! Pode me dizer o título, autor ou tema do livro que deseja?"
     elif tipo=="livro" and valor:
-        resultado = buscar_livro_ou_autor(valor,"livro")
+        resultado = buscar_livro_ou_autor(valor, "livro", pergunta)
         if resultado: return resultado
     elif tipo=="autor" and valor:
-        resultado = buscar_livro_ou_autor(valor,"autor")
+        resultado = buscar_livro_ou_autor(valor, "autor", pergunta)
         if resultado: return resultado
     elif tipo=="tema" and valor:
-        resultado = buscar_livro_por_subject(valor)
+        resultado = buscar_livro_por_subject(valor, pergunta)
         if resultado: return resultado
 
-    # fallback geral: tenta buscar pelo valor como título, autor ou tema
     if valor:
         for tipo_busca in ["livro","autor","tema"]:
-            if tipo_busca=="tema":
-                resultado = buscar_livro_por_subject(valor)
-            else:
-                resultado = buscar_livro_ou_autor(valor,tipo_busca)
+            resultado = buscar_livro_por_subject(valor, pergunta) if tipo_busca=="tema" else buscar_livro_ou_autor(valor, tipo_busca, pergunta)
             if resultado:
                 return resultado
 
