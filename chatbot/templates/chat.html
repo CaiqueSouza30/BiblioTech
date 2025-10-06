@@ -2,32 +2,130 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>ChatBot de Livros 📚</title>
+    <title>📚 ChatBot Literário</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather&family=Roboto&display=swap" rel="stylesheet">
+
     <style>
-        body { font-family: Arial; max-width: 600px; margin: auto; padding-top: 40px; }
-        .msg { margin: 10px 0; }
-        .user { color: blue; }
-        .bot { color: green; }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 50px auto;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            padding: 20px 30px;
+        }
+
+        h2 {
+            font-family: 'Merriweather', serif;
+            color: #4A4A4A;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .chat-box {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
+            margin-bottom: 20px;
+        }
+
+        .msg {
+            margin: 15px 0;
+            padding: 10px 15px;
+            border-radius: 8px;
+            line-height: 1.5;
+        }
+
+        .user {
+            background: #e8f0fe;
+            align-self: flex-end;
+            color: #1a73e8;
+            font-weight: bold;
+        }
+
+        .bot {
+            background: #e6ffe6;
+            color: #2e7d32;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        input[type="text"] {
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px 16px;
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #155ab6;
+        }
+
+        .clear-btn {
+            background-color: #d9534f;
+        }
+
+        .clear-btn:hover {
+            background-color: #c9302c;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 20px;
+                padding: 20px;
+            }
+
+            h2 {
+                font-size: 22px;
+            }
+        }
     </style>
 </head>
 <body>
-    <h2>ChatBot de Recomendação de Livros</h2>
+    <div class="container">
+        <h2>📚 Assistente de Recomendação Literária</h2>
 
-    <div>
-        {% for pergunta, resposta in conversas %}
-            <div class="msg user"><strong>Você:</strong> {{ pergunta }}</div>
-            <div class="msg bot"><strong>Bot:</strong> {{ resposta }}</div>
-        {% endfor %}
+        <div class="chat-box">
+            {% for pergunta, resposta in conversas %}
+                <div class="msg user"><strong>Você:</strong> {{ pergunta }}</div>
+                <div class="msg bot"><strong>Bot:</strong> {{ resposta }}</div>
+            {% endfor %}
+        </div>
+
+        <form method="post">
+            <input type="text" name="pergunta" placeholder="Digite sua pergunta sobre livros..." required>
+            <button type="submit">📨 Enviar</button>
+        </form>
+
+        <form method="post" action="/limpar">
+            <button type="submit" class="clear-btn">🧹 Limpar Conversa</button>
+        </form>
     </div>
-
-    <form method="post">
-        <input type="text" name="pergunta" required style="width: 80%;">
-        <button type="submit">Enviar</button>
-    </form>
-    <form method="post" action="/limpar" style="margin-top: 10px;">
-    <button type="submit" style="background-color: #dc3545; color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer;">
-        Limpar Conversa
-    </button>
-    </form>
 </body>
 </html>
