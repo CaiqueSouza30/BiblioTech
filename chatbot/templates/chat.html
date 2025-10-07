@@ -1,131 +1,143 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
-    <title>📚 ChatBot Literário</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Merriweather&family=Roboto&display=swap" rel="stylesheet">
-
-    <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            background: #f4f4f9;
-            color: #333;
-            margin: 0;
-            padding: 0;
-        }
-
-        .container {
-            max-width: 700px;
-            margin: 50px auto;
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
-            padding: 20px 30px;
-        }
-
-        h2 {
-            font-family: 'Merriweather', serif;
-            color: #4A4A4A;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .chat-box {
-            max-height: 400px;
-            overflow-y: auto;
-            padding-right: 10px;
-            margin-bottom: 20px;
-        }
-
-        .msg {
-            margin: 15px 0;
-            padding: 10px 15px;
-            border-radius: 8px;
-            line-height: 1.5;
-        }
-
-        .user {
-            background: #e8f0fe;
-            align-self: flex-end;
-            color: #1a73e8;
-            font-weight: bold;
-        }
-
-        .bot {
-            background: #e6ffe6;
-            color: #2e7d32;
-        }
-
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        input[type="text"] {
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 16px;
-        }
-
-        button {
-            padding: 10px 16px;
-            background-color: #1a73e8;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-
-        button:hover {
-            background-color: #155ab6;
-        }
-
-        .clear-btn {
-            background-color: #d9534f;
-        }
-
-        .clear-btn:hover {
-            background-color: #c9302c;
-        }
-
-        @media (max-width: 600px) {
-            .container {
-                margin: 20px;
-                padding: 20px;
-            }
-
-            h2 {
-                font-size: 22px;
-            }
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BiblioTech</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Rowdies:wght@300;400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='books.css') }}">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="icon" type="image/x-icon"
+        href="{{ url_for('static', filename='imagens/question-mark.png') }}">
 </head>
-<body>
-    <div class="container">
-        <h2>📚 Assistente de Recomendação Literária</h2>
 
-        <div class="chat-box">
-            {% for pergunta, resposta in conversas %}
-                <div class="msg user"><strong>Você:</strong> {{ pergunta }}</div>
-                <div class="msg bot"><strong>Bot:</strong> {{ resposta }}</div>
-            {% endfor %}
+<body>
+    <header>
+        <div class="logo-container">
+            <h1>BiblioTech</h1>
+        </div>
+        <div class="input-container">
+            <input type="text" placeholder="Busque por título, autor, editora..." class="text-box">
+        </div>
+        <div class="entrar-container">
+            <button class="botao">Entrar</button>
+        </div>
+    </header>
+
+    <div class="container-cards">
+        <!-- Seus cards fixos -->
+        <div class="container-cards">
+    <!-- Card 1 -->
+    <div class="card">
+        <div class="card-imagem">
+            <img src="{{ url_for('static', filename='imagens/a_biblioteca_da_meia_noite_1_1_1f6b6a32c1687099457ef952eff2fe5a.webp') }}"
+                alt="Biblioteca da Meia Noite">
+        </div>
+        <div class="card-conteudo">
+            <h2 class="card-titulo">A biblioteca da meia noite</h2>
+            <h3 class="card-subtitulo">Matt Haig</h3>
+            <p class="card-descricao">Nora Seed ganha a chance de voltar no tempo e desfazer arrependimentos em diferentes vidas.</p>
+            <a href="#" class="card-botao"><i class="fa-solid fa-cart-shopping"></i> Comprar Livro</a>
+        </div>
+    </div>
+
+    <!-- Card 2 -->
+    <div class="card">
+        <div class="card-imagem">
+            <img src="{{ url_for('static', filename='imagens/domcasmurro.jpg') }}" alt="Dom Casmurro">
+        </div>
+        <div class="card-conteudo">
+            <h2 class="card-titulo">Dom Casmurro</h2>
+            <h3 class="card-subtitulo">Machado de Assis</h3>
+            <p class="card-descricao">A clássica narrativa sobre Bentinho, Capitu e o mistério da traição.</p>
+            <a href="#" class="card-botao"><i class="fa-solid fa-cart-shopping"></i> Comprar Livro</a>
+        </div>
+    </div>
+
+    <!-- Card 3 -->
+    <div class="card">
+        <div class="card-imagem">
+            <img src="{{ url_for('static', filename='imagens/grande-sertao.jpg') }}" alt="Grande Sertão: Veredas">
+        </div>
+        <div class="card-conteudo">
+            <h2 class="card-titulo">Grande Sertão: Veredas</h2>
+            <h3 class="card-subtitulo">Guimarães Rosa</h3>
+            <p class="card-descricao">A saga de Riobaldo e os dilemas entre amor, guerra e destino no sertão.</p>
+            <a href="#" class="card-botao"><i class="fa-solid fa-cart-shopping"></i> Comprar Livro</a>
+        </div>
+    </div>
+
+    <!-- Card 4 -->
+    <div class="card">
+        <div class="card-imagem">
+            <img src="{{ url_for('static', filename='imagens/memorias-postumas.jpg') }}" alt="Memórias Póstumas de Brás Cubas">
+        </div>
+        <div class="card-conteudo">
+            <h2 class="card-titulo">Memórias Póstumas</h2>
+            <h3 class="card-subtitulo">Machado de Assis</h3>
+            <p class="card-descricao">Um defunto-autor narra suas memórias com ironia e filosofia.</p>
+            <a href="#" class="card-botao"><i class="fa-solid fa-cart-shopping"></i> Comprar Livro</a>
+        </div>
+    </div>
+</div>
+    </div>
+
+    <!-- Chat integrado -->
+    <div class="chat-container">
+        <h2>Chat Literário</h2>
+        <form action="/" method="POST" class="chat-form">
+            <input type="text" name="pergunta" placeholder="Pergunte sobre um livro, autor ou tema..." required>
+            <button type="submit">Enviar</button>
+        </form>
+
+        <div class="chat-respostas">
+            {% if conversas %}
+                {% for pergunta, resposta in conversas %}
+                    <div class="mensagem usuario">
+                        <strong>Você:</strong> {{ pergunta }}
+                    </div>
+                    <div class="mensagem bot">
+                        <strong>BiblioTech:</strong> {{ resposta|safe }}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="chat-placeholder">Faça sua primeira pergunta sobre livros!</p>
+            {% endif %}
         </div>
 
-        <form method="post">
-            <input type="text" name="pergunta" placeholder="Digite sua pergunta sobre livros..." required>
-            <button type="submit">📨 Enviar</button>
-        </form>
-
-        <form method="post" action="/limpar">
-            <button type="submit" class="clear-btn">🧹 Limpar Conversa</button>
+        <form action="/limpar" method="POST">
+            <button type="submit" class="botao-limpar">Limpar conversa</button>
         </form>
     </div>
+
+    <footer class="rodape-site">
+        <div class="colunas-links">
+            <div class="rodape-coluna">
+                <h4>Saiba mais</h4>
+                <ul>
+                    <li><a href="#">Quem somos</a></li>
+                    <li><a href="#">Termos de uso</a></li>
+                    <li><a href="#">Fale conosco</a></li>
+                </ul>
+            </div>
+            <div class="rodape-coluna">
+                <h4>Explore</h4>
+                <ul>
+                    <li><a href="#">Livros</a></li>
+                    <li><a href="#">Autores</a></li>
+                    <li><a href="#">Editoras</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="rodape-inferior">
+            <p>&copy; 2025 BiblioTech. Todos os direitos reservados.</p>
+        </div>
+    </footer>
 </body>
 </html>

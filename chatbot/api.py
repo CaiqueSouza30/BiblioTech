@@ -202,6 +202,7 @@ def interpretar_pergunta_ia(pergunta):
     except Exception as e:
         print("Erro IA:", e)
         return {"tipo": "tema", "valor": pergunta}
+
 def entrada_valida(pergunta):
     pergunta_clean = pergunta.strip().lower()
     return len(pergunta_clean) > 1 and pergunta_clean not in palavras_irrelevantes
