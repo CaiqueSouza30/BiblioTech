@@ -210,7 +210,7 @@ def entrada_valida(pergunta):
 def eh_saudacao(pergunta):
     saudacoes = ["oi", "olá", "ola", "bom dia", "boa tarde", "boa noite", "hey", "hello", "iae",
                  "eae", "fala", "tudo bem", "como vai", "como você está", "tudo certo", "saudações",
-                 "salve", "e aí", "beleza", "opa", "i ae", "e ae"]
+                 "salve", "e aí", "beleza", "opa", "i ae", "e ae","ei"]
     pergunta_clean = pergunta.strip().lower()
     return any(palavra in pergunta_clean for palavra in saudacoes)
 

@@ -187,6 +187,8 @@ header h1 {
 
 /* Respostas do chat */
 .chat-respostas {
+    display: flex;
+    flex-direction: column;
     max-height: 350px;
     overflow-y: auto;
     padding: 15px;

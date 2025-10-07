@@ -30,65 +30,7 @@
         </div>
     </header>
 
-    <div class="container-cards">
-        <!-- Seus cards fixos -->
-        <div class="container-cards">
-    <!-- Card 1 -->
-    <div class="card">
-        <div class="card-imagem">
-            <img src="{{ url_for('static', filename='imagens/a_biblioteca_da_meia_noite_1_1_1f6b6a32c1687099457ef952eff2fe5a.webp') }}"
-                alt="Biblioteca da Meia Noite">
-        </div>
-        <div class="card-conteudo">
-            <h2 class="card-titulo">A biblioteca da meia noite</h2>
-            <h3 class="card-subtitulo">Matt Haig</h3>
-            <p class="card-descricao">Nora Seed ganha a chance de voltar no tempo e desfazer arrependimentos em diferentes vidas.</p>
-            <a href="#" class="card-botao"><i class="fa-solid fa-cart-shopping"></i> Comprar Livro</a>
-        </div>
-    </div>
-
-    <!-- Card 2 -->
-    <div class="card">
-        <div class="card-imagem">
-            <img src="{{ url_for('static', filename='imagens/domcasmurro.jpg') }}" alt="Dom Casmurro">
-        </div>
-        <div class="card-conteudo">
-            <h2 class="card-titulo">Dom Casmurro</h2>
-            <h3 class="card-subtitulo">Machado de Assis</h3>
-            <p class="card-descricao">A clássica narrativa sobre Bentinho, Capitu e o mistério da traição.</p>
-            <a href="#" class="card-botao"><i class="fa-solid fa-cart-shopping"></i> Comprar Livro</a>
-        </div>
-    </div>
-
-    <!-- Card 3 -->
-    <div class="card">
-        <div class="card-imagem">
-            <img src="{{ url_for('static', filename='imagens/grande-sertao.jpg') }}" alt="Grande Sertão: Veredas">
-        </div>
-        <div class="card-conteudo">
-            <h2 class="card-titulo">Grande Sertão: Veredas</h2>
-            <h3 class="card-subtitulo">Guimarães Rosa</h3>
-            <p class="card-descricao">A saga de Riobaldo e os dilemas entre amor, guerra e destino no sertão.</p>
-            <a href="#" class="card-botao"><i class="fa-solid fa-cart-shopping"></i> Comprar Livro</a>
-        </div>
-    </div>
-
-    <!-- Card 4 -->
-    <div class="card">
-        <div class="card-imagem">
-            <img src="{{ url_for('static', filename='imagens/memorias-postumas.jpg') }}" alt="Memórias Póstumas de Brás Cubas">
-        </div>
-        <div class="card-conteudo">
-            <h2 class="card-titulo">Memórias Póstumas</h2>
-            <h3 class="card-subtitulo">Machado de Assis</h3>
-            <p class="card-descricao">Um defunto-autor narra suas memórias com ironia e filosofia.</p>
-            <a href="#" class="card-botao"><i class="fa-solid fa-cart-shopping"></i> Comprar Livro</a>
-        </div>
-    </div>
-</div>
-    </div>
-
-    <!-- Chat integrado -->
+    <!-- Chat integrado AGORA FICA ACIMA -->
     <div class="chat-container">
         <h2>Chat Literário</h2>
         <form action="/" method="POST" class="chat-form">
@@ -116,6 +58,58 @@
         </form>
     </div>
 
+    <!-- Cards AGORA FICAM ABAIXO -->
+    <div class="container-cards">
+        <div class="card">
+            <div class="card-imagem">
+                <img src="{{ url_for('static', filename='imagens/a_biblioteca_da_meia_noite_1_1_1f6b6a32c1687099457ef952eff2fe5a.webp') }}"
+                    alt="Biblioteca da Meia Noite">
+            </div>
+            <div class="card-conteudo">
+                <h2 class="card-titulo">A biblioteca da meia noite</h2>
+                <h3 class="card-subtitulo">Matt Haig</h3>
+                <p class="card-descricao">Nora Seed ganha a chance de voltar no tempo e desfazer arrependimentos em diferentes vidas.</p>
+                <a href="#" class="card-botao"><i class="fa-solid fa-cart-shopping"></i> Comprar Livro</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-imagem">
+                <img src="{{ url_for('static', filename='imagens/domcasmurro.jpg') }}" alt="Dom Casmurro">
+            </div>
+            <div class="card-conteudo">
+                <h2 class="card-titulo">Dom Casmurro</h2>
+                <h3 class="card-subtitulo">Machado de Assis</h3>
+                <p class="card-descricao">A clássica narrativa sobre Bentinho, Capitu e o mistério da traição.</p>
+                <a href="#" class="card-botao"><i class="fa-solid fa-cart-shopping"></i> Comprar Livro</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-imagem">
+                <img src="{{ url_for('static', filename='imagens/srdasmoscas.jpg') }}" alt="Senhor das Moscas">
+            </div>
+            <div class="card-conteudo">
+                <h2 class="card-titulo">Senhor das Moscas</h2>
+                <h3 class="card-subtitulo">William Golding</h3>
+                <p class="card-descricao">Um grupo de meninos isolados revela a luta entre civilização e selvageria.</p>
+                <a href="#" class="card-botao"><i class="fa-solid fa-cart-shopping"></i> Comprar Livro</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-imagem">
+                <img src="{{ url_for('static', filename='imagens/percyJack.jpg') }}" alt="Percy Jackson">
+            </div>
+            <div class="card-conteudo">
+                <h2 class="card-titulo">Percy Jackson</h2>
+                <h3 class="card-subtitulo">Rick Riordan</h3>
+                <p class="card-descricao">Um jovem descobre ser filho de um deus grego e embarca em aventuras míticas para salvar o mundo.</p>
+                <a href="#" class="card-botao"><i class="fa-solid fa-cart-shopping"></i> Comprar Livro</a>
+            </div>
+        </div>
+    </div>
+
     <footer class="rodape-site">
         <div class="colunas-links">
             <div class="rodape-coluna">
@@ -139,5 +133,24 @@
             <p>&copy; 2025 BiblioTech. Todos os direitos reservados.</p>
         </div>
     </footer>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const form = document.querySelector('.chat-form');
+            const input = document.querySelector('.chat-form input[name="pergunta"]');
+            const chatBox = document.querySelector('.chat-respostas');
+    
+            if (input) input.focus();
+    
+            // Mantém o foco no campo após enviar a mensagem
+            form.addEventListener('submit', function() {
+                setTimeout(() => input.focus(), 100);
+            });
+    
+            // Rola automaticamente até o final (última mensagem)
+            if (chatBox) {
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+        });
+    </script> 
 </body>
 </html>
